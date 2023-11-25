@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     String m_Text="";
     SharedPreferences sPref;
     List<String> items;
+    Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         DemoAdapter adapter = new DemoAdapter(items);
         recyclerView.setAdapter(adapter);
+
+        context = this;
 
         findViewById(R.id.add).setOnClickListener(view -> {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -101,6 +105,10 @@ public class MainActivity extends AppCompatActivity {
             items.add("Редактируйте свой список покупок");
         }
     }
+
+    public void Edit(String value, DemoAdapter adapter){
+
+    }
     public class DemoAdapter extends RecyclerView.Adapter<DemoVH> {
 
         List<String> items;
@@ -137,6 +145,32 @@ public class MainActivity extends AppCompatActivity {
             itemView.findViewById(R.id.delete).setOnClickListener(view -> {
                 adapter.items.remove(getAbsoluteAdapterPosition());
                 adapter.notifyItemRemoved(getAbsoluteAdapterPosition());
+            });
+            itemView.findViewById(R.id.edit).setOnClickListener(view -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setTitle("Режим редактирования");
+
+                final EditText input = new EditText(context);
+                input.setText(adapter.items.get(getAbsoluteAdapterPosition()));
+
+                input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        m_Text = input.getText().toString();
+                        adapter.items.set(getAbsoluteAdapterPosition(), m_Text);
+                        adapter.notifyItemChanged(getAbsoluteAdapterPosition());
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
             });
 
         }
